@@ -1,227 +1,110 @@
 <?php
-/*
- * آموزش کدنویسی این پلاگین در دوره های وبسایت شکرینو
- * shokrino.com
+/**
+ * ReadySMS SMS Handling Class using MessageWay (msgway.com) API
+ * Customized for Ready Studio - readystudio.ir
  */
 defined('ABSPATH') || exit;
-class OTINO_Sms {
-    public function __construct() {}
 
-    public function listOfPanels() {
-        $panels = apply_filter('smspanel_pnlt', array(
-            'farazsms' => 'فراز اس ام اس',
-            'modirpayamak' => 'مدیر پیامک',
-            'maxsms' => 'مکس اس ام اس',
-            'panelsmspro' => 'پنل اس ام اس پرو',
-            'rangine' => 'رنگینه',
-            'kavehnegar' => 'کاوه نگار',
-            'farapayamak' => 'فرا پیامک',
-            'mellipayamak' => 'ملی پیامک',
-            'smsir' => 'sms.ir',
-        ));
-        return $panels;
+class READYSMS_Sms {
+
+    /**
+     * The API endpoint for sending OTP messages with a custom code.
+     */
+    const MSGWAY_SEND_ENDPOINT = 'https://api.msgway.com/send';
+
+    public function __construct() {
     }
-    public function connection() {
-        $data = array(
-            'panel' => otino_option('panel-sms'),
-            'user' => otino_option('username_sms'),
-            'pass' => otino_option('password_sms'),
-            'sender' => otino_option('sender_sms'),
-            'api' => otino_option('api_sms'),
-            'secret' => otino_option('secret_sms'),
-            'templateId' => otino_option('templateid_sms'),
-            'pattern' => otino_option('pattern_sms'),
-            'variable' => str_replace('%', '', otino_option('variable_sms')),
-        );
+
+    /**
+     * Gathers the connection data from plugin options.
+     * @return array
+     */
+    private function get_connection_data() {
+        // Options needed for the MessageWay /send API.
+        // The option names should be defined in 'config-optionino.php'.
+        $data = [
+            'apikey'     => readysms_option('api_key_sms'),
+            'templateID' => readysms_option('template_id_sms'), // Using templateID now
+        ];
         return $data;
     }
-    public function sendSmsPattern($to) {
-        $conn = $this->connection();
-        $sms_panel = $conn['panel'];
-        if($sms_panel == "farazsms" or $sms_panel == "maxsms" or $sms_panel == "modirpayamak" or $sms_panel == "panelsmspro" or $sms_panel == "rangine") {
-            $return = $this->ippanel_pattern($conn['user'],$conn['pass'],$conn['sender'],$to,$conn['pattern'],$conn['variable']);
-        } elseif($sms_panel == "kavehnegar") {
-            $return = $this->kavehnegar_pattern($conn['api'],$to,$conn['pattern']);
-        } elseif($sms_panel == "melipayamak" or $sms_panel == "farapayamak") {
-            $return = $this->melipayamak_pattern($conn['user'],$conn['pass'],$to,$conn['pattern']);
-        } elseif($sms_panel == "smsir") {
-            $return = $this->smsir_pattern($conn['api'],$conn['secret'],$to,$conn['templateId'],$conn['pattern']);
-        } else {
-            $return = "پنل پیامکی انتخابی شما پشتیبانی نمیشود!";
-        }
-        return $return;
-    }
-    public function ippanel_pattern($user,$pass,$from,$to,$pattern,$variable) {
-        try {
-            if(class_exists('SoapClient')) {
-                $client = new SoapClient("http://ippanel.com/class/sms/wsdlservice/server.php?wsdl");
-                if (!is_array($to)) {
-                    $to = array($to);
-                }
-                $random_code = (new OTINO_Ajax())->generatePattern();
-                $input_data = array($variable => "$random_code");
-                $response = $client->sendPatternSms($from, $to, $user, $pass, $pattern, $input_data);
-                if (is_numeric($response)) {
-                    return $random_code;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } catch (SoapFault $e) {
-            echo "SOAP Error: " . $e->getMessage();
-            return false;
-        } catch (Exception $e) {
-            echo "Error: " . $e->getMessage();
+
+    /**
+     * Sends the OTP SMS to the given number.
+     * @param string $to The recipient's mobile number.
+     * @return string|false The generated code on success, false on failure.
+     */
+    public function send_pattern_sms($to) {
+        $conn = $this->get_connection_data();
+        
+        if (empty($conn['apikey']) || empty($conn['templateID'])) {
+            // error_log('ReadySMS Error: MessageWay API Key or Template ID is not set.');
             return false;
         }
-    }
-    public function kavehnegar_pattern($api,$to,$pattern) {
-        try {
-            $random_code = (new OTINO_Ajax())->generatePattern();
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, 'https://api.kavenegar.com/v1/'.$api.'/verify/lookup.json/');
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-                'Accept: application/json',
-                'Content-Type: application/x-www-form-urlencoded',
-                'charset: utf-8'
-            ));
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query(array(
-                "receptor" => $to,
-                "token" => $random_code,
-                "template" => $pattern
-            )));
+        
+        // First, generate the random code ourself.
+        $random_code = (new READYSMS_Ajax())->generatePattern();
 
-            $response = curl_exec($curl);
-            curl_close($curl);
+        // Then, try to send it via the gateway.
+        $is_sent = $this->msgway_send_otp($conn['apikey'], $to, $conn['templateID'], $random_code);
 
-            $response_data = json_decode($response, true);
-            if (isset($response_data['return']['status']) && $response_data['return']['status'] == 200) {
-                return $random_code;
-            } else {
-                return false;
-            }
-        } catch (Exception $e) {
-            return false;
+        // If it was sent successfully, return the code so it can be verified.
+        if ($is_sent) {
+            return $random_code;
         }
-    }
-    public function melipayamak_pattern($user,$pass,$to,$pattern) {
-        try {
-            if(class_exists('SoapClient')) {
-                $client = new SoapClient("http://api.payamak-panel.com/post/Send.asmx?wsdl");
-                if (is_array($to)) {
-                    $to = $to[0];
-                }
-                $random_code = (new OTINO_Ajax())->generatePattern();
-                $input_data = array(
-                    'username' => $user,
-                    'password' => $pass,
-                    'text' => array($random_code),
-                    'to' => $to,
-                    'bodyId' => $pattern
-                );
-                $response = $client->SendByBaseNumber($input_data)->SendByBaseNumberResult;
-                if (is_numeric($response)) {
-                    return $random_code;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } catch (SoapFault $e) {
-            echo "SOAP Error: " . $e->getMessage();
-            return false;
-        } catch (Exception $e) {
-            echo "Error: " . $e->getMessage();
-            return false;
-        }
-    }
-    public function get_token_smsir($api,$secret) {
-        $postData = array(
-            'UserApiKey' => $api,
-            'SecretKey' => $secret,
-            'System' => 'php_rest_v_2_0'
-        );
-        $postString = json_encode($postData);
-        $APIURL = "https://ws.sms.ir/";
-        $ch = curl_init($APIURL."api/Token");
-        curl_setopt(
-            $ch, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json'
-            )
-        );
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postString);
 
-        $result = curl_exec($ch);
-        curl_close($ch);
-
-        $response = json_decode($result);
-
-        $resp = false;
-        $IsSuccessful = '';
-        $TokenKey = '';
-        if (is_object($response)) {
-            $IsSuccessful = $response->IsSuccessful;
-            if ($IsSuccessful == true) {
-                $TokenKey = $response->TokenKey;
-                $resp = $TokenKey;
-            } else {
-                $resp = false;
-            }
-        }
-        return $resp;
+        return false;
     }
-    public function smsir_pattern($api,$secret,$to,$template_id,$pattern) {
-        $random_code = (new OTINO_Ajax())->generatePattern();
-        $params = json_encode([
-            "mobile" => $to,
-            "templateId" => $template_id,
-            "parameters" => [['name' => $pattern, 'value' => (string) $random_code]],
+
+    /**
+     * Handles sending the self-generated OTP code via MessageWay gateway.
+     *
+     * @param string $api_key      The gateway API key.
+     * @param string $recipient    The recipient mobile number.
+     * @param int    $template_id  The template ID from the gateway panel.
+     * @param string $code         The random code to send.
+     * @return bool True on success, false on failure.
+     */
+    private function msgway_send_otp($api_key, $recipient, $template_id, $code) {
+        // Prepare the data payload as a JSON object, according to the new sample.
+        $params = [
+            "mobile"     => $recipient,
+            "method"     => "sms",
+            "templateID" => (int) $template_id,
+            "code"       => (string) $code,
+        ];
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => self::MSGWAY_SEND_ENDPOINT,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POSTFIELDS     => json_encode($params),
+            CURLOPT_HTTPHEADER     => [
+                'apiKey: ' . $api_key,
+                'Content-Type: application/json',
+            ],
         ]);
-        $token = $this->get_token_smsir($api,$secret);
-        $auth = array(
-            'Content-Type: application/json',
-            "X-API-KEY: {$token}"
-        );
-        try {
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://api.sms.ir/v1/send/verify',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => $params,
-                CURLOPT_HTTPHEADER => $auth,
-            ));
-            $response = curl_exec($curl);
-            curl_close($curl);
-            $res = json_decode($response,true);
-            if($res['status'] == true){
-                if (is_numeric($response)) {
-                    return $random_code;
-                } else {
-                    return false;
-                }
+
+        $response_body = curl_exec($curl);
+        $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+        
+        // Check for a successful HTTP status code (e.g., 200)
+        if ($http_code == 200) {
+            $response_data = json_decode($response_body, true);
+            // Check for the success status in the response.
+            // Adjust 'status' and '1' if the actual success response is different.
+            if (isset($response_data['status']) && $response_data['status'] == 1) {
+                return true;
             }
-            return false;
-        } catch (Exception $e) {
-            return false;
         }
+        
+        // If the request fails, log the response for debugging.
+        // error_log("ReadySMS MessageWay Error: HTTP Code: $http_code | Response: $response_body");
+        return false;
     }
 }
-new OTINO_Sms;
+
+// Instantiate the class.
+new READYSMS_Sms();

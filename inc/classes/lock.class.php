@@ -1,79 +1,103 @@
 <?php
 defined('ABSPATH') || exit;
 
-if ( ! class_exists( 'OTINO_Lock_Content' ) ) {
-    class OTINO_Lock_Content {
+if (!class_exists('READYSMS_Lock_Content')) {
+    /**
+     * Class READYSMS_Lock_Content
+     * Handles content locking for non-logged-in users.
+     */
+    class READYSMS_Lock_Content {
 
         public function __construct() {
-            add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
-            add_action( 'save_post', [ $this, 'save_meta' ] );
-            add_action( 'template_redirect', [ $this, 'check_access' ] );
-            add_action( 'init', [ $this, 'handle_redirect_after_login' ] ); // به جای woocommerce_login_redirect
+            add_action('add_meta_boxes', [$this, 'add_meta_box']);
+            add_action('save_post', [$this, 'save_meta_data']);
+            add_action('template_redirect', [$this, 'check_content_access']);
+            add_action('init', [$this, 'handle_redirect_after_login']);
         }
 
+        /**
+         * Adds the meta box to post and page edit screens.
+         */
         public function add_meta_box() {
             add_meta_box(
-                'otino_lock_meta',
-                'قفل ورود کاربر (اوتینو)',
-                [ $this, 'render_meta_box' ],
-                [ 'post', 'page' ],
-                'side',
-                'high'
+                'readysms_lock_meta_box',      // Meta box ID
+                'قفل محتوا (ReadySMS)',        // Meta box Title
+                [$this, 'render_meta_box_content'], // Callback function
+                ['post', 'page'],              // Post types
+                'side',                        // Position
+                'high'                         // Priority
             );
         }
 
-        public function render_meta_box( $post ) {
-            $value = get_post_meta( $post->ID, '_otino_lock_post', true );
+        /**
+         * Renders the content of the meta box.
+         * @param WP_Post $post The current post object.
+         */
+        public function render_meta_box_content($post) {
+            // Use a unique meta key for our plugin
+            $is_locked = get_post_meta($post->ID, '_readysms_content_locked', true);
             ?>
             <label>
-                <input type="checkbox" name="otino_lock_post" value="1" <?php checked( $value, '1' ); ?>>
-                برای مشاهده این برگه کاربر باید وارد حساب کاربری شود
+                <input type="checkbox" name="readysms_lock_post_field" value="1" <?php checked($is_locked, '1'); ?>>
+                برای مشاهده این محتوا، کاربر باید وارد شود.
             </label>
             <?php
         }
 
-        public function save_meta( $post_id ) {
-            if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+        /**
+         * Saves the custom meta data when a post is saved.
+         * @param int $post_id The ID of the post being saved.
+         */
+        public function save_meta_data($post_id) {
+            if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                return;
+            }
 
-            if ( isset( $_POST['otino_lock_post'] ) ) {
-                update_post_meta( $post_id, '_otino_lock_post', '1' );
+            // Check if our field is set.
+            if (isset($_POST['readysms_lock_post_field'])) {
+                update_post_meta($post_id, '_readysms_content_locked', '1');
             } else {
-                delete_post_meta( $post_id, '_otino_lock_post' );
+                delete_post_meta($post_id, '_readysms_content_locked');
             }
         }
 
-        public function check_access() {
-            if ( is_singular( [ 'post', 'page' ] ) ) {
+        /**
+         * Checks if the current content is locked and if the user has access.
+         * If not, redirects to the login page.
+         */
+        public function check_content_access() {
+            if (is_singular(['post', 'page'])) {
                 global $post;
-                $locked = get_post_meta( $post->ID, '_otino_lock_post', true );
+                $is_locked = get_post_meta($post->ID, '_readysms_content_locked', true);
 
-                if ( $locked == '1' && ! is_user_logged_in() ) {
-                    $redirect_url = get_permalink( $post->ID );
-                    $login_url    = wc_get_page_permalink( 'myaccount' );
+                if ($is_locked && !is_user_logged_in()) {
+                    $current_page_url = get_permalink($post->ID);
+                    $login_page_url = wc_get_page_permalink('myaccount'); // Assuming WooCommerce is active
 
-                    // آدرس با پارامتر
-                    $redirect_with_args = add_query_arg( [
-                        'redirect-after-login' => 'otino-page',
-                        'redirect-url'         => urlencode( $redirect_url ),
-                        'pagelock'             => '1'
-                    ], $login_url );
+                    // Add query arguments for redirecting back after login
+                    $redirect_url_with_args = add_query_arg([
+                        'redirect_after_login' => 'readysms-content',
+                        'redirect_url'         => urlencode($current_page_url),
+                    ], $login_page_url);
 
-                    wp_redirect( $redirect_with_args );
+                    wp_redirect($redirect_url_with_args);
                     exit;
                 }
             }
         }
 
+        /**
+         * Handles the redirection back to the locked page after a successful login.
+         */
         public function handle_redirect_after_login() {
-            if ( isset($_GET['redirect-after-login']) && is_user_logged_in() ) {
-                if ( $_GET['redirect-after-login'] === 'otino-page' && !empty($_GET['redirect-url']) ) {
-                    wp_redirect( esc_url_raw( $_GET['redirect-url'] ) );
+            if (is_user_logged_in() && isset($_GET['redirect_after_login'])) {
+                if ($_GET['redirect_after_login'] === 'readysms-content' && !empty($_GET['redirect_url'])) {
+                    wp_redirect(esc_url_raw(urldecode($_GET['redirect_url'])));
                     exit;
                 }
             }
         }
-        
     }
 
-    new OTINO_Lock_Content();
+    new READYSMS_Lock_Content();
 }
