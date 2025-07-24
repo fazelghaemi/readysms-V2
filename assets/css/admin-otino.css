@@ -1,0 +1,46 @@
+#optionino * {
+    font-family: VazirMatn !important;
+}
+#otino-loader {
+    background: #f8f8f8;
+    padding: 10px;
+    border: 1px solid #ddd;
+    width: 300px;
+}
+#otino-export-result .notice {
+    padding: 15px;
+    margin-top: 10px;
+}
+#otino-export-form {
+    display: flex;
+    flex-direction: column;
+    padding: 25px 35px;
+    background: white;
+    border-radius: 25px;
+    min-height: 600px;
+}
+#otino-export-form h2 {
+    font-size: 20px;
+    border-right: 3px solid var(--optionino-main-color);
+    padding: 15px;
+    margin: 0;
+}
+#otino-export-btn {
+    background-color: var(--optionino-main-color);
+    border: none;
+    border-radius: 15px;
+}
+@font-face {
+    font-display:swap;
+    font-family:VazirMatn;
+    font-style:normal;
+    font-weight:normal;
+    src:url(../fonts/vazirmatn/Vazirmatn-Regular.woff2) format('woff2')
+}
+@font-face {
+    font-display:swap;
+    font-family:VazirMatn;
+    font-style:normal;
+    font-weight:bold;
+    src:url(../fonts/vazirmatn/Vazirmatn-Medium.woff2) format('woff2')
+}

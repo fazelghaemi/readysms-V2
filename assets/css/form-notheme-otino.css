@@ -1,0 +1,98 @@
+.no-template-otino {
+    position: relative;
+    overflow: hidden;
+}
+.no-template-otino.loading .otino-loading-box {
+    display: flex !important;
+}
+.otino-response-box {
+    position: absolute;
+    background: #ebffe2;
+    color: #277504;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+}
+.otino_otp_container {
+    display: flex;
+    justify-content: center;
+    gap: 2.5%;
+    direction: ltr;
+    width: 100%;
+}
+.otino_otp_item {
+    width: 100%;
+    padding: 16px;
+    text-align: center;
+    display: flex;
+    font-size: 20px;
+    border-radius: 14px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: none;
+    outline: none !important;
+    background: #fff;
+    border: 1px solid #dcdcdc;
+    -webkit-appearance: none;
+    -webkit-transition: all .3s;
+    transition: 0.3s all ease-in-out;
+    aspect-ratio: 1 / 1;
+}
+.otino_otp_item:focus {
+    border-color: #00A2C3;
+}
+#otino-form-otp, .otino-login-form.otp-active {
+    display: none !important;
+}
+.otino-login-form.otp-active + #otino-form-otp {
+    display: inherit !important;
+}
+.otino-loading-box {
+    display: none;
+    background: #00000052;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    right: 0;
+}
+.otino-loading-box svg {
+    width: 45px;
+    height: auto;
+}
+.response-otino {
+    padding: 10px 22px 14px;
+}
+.otp-change-phone-otino {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+.change-phone-now-otino {
+    display: flex;
+    color: #00A2C3;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.otp-time-reset-otino {
+    color: #52667B;
+    font-size: 13px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: -20px;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.login-form-side.wd-side-hidden.woocommerce.wd-left.wd-opened * {
+    display: none !important;
+}
