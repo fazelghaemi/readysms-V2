@@ -28,7 +28,7 @@ if (!function_exists('is_plugin_active')) {
 
 // Include required files
 require_once READYSMS_INC_PATH . 'lib/optionino-framework/optionino-framework.php';
-require_once READYSMS_INC_PATH . 'lib/config-optionino.php'; // Needs refactoring
+require_once READYSMS_INC_PATH . 'lib/readysms-settings.php'; // Needs refactoring
 require_once READYSMS_INC_PATH . 'classes/auto.class.php';    // Needs refactoring
 require_once READYSMS_INC_PATH . 'classes/core.class.php';    // Needs refactoring
 require_once READYSMS_INC_PATH . 'classes/ajax.class.php';    // Needs refactoring
