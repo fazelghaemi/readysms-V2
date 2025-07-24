@@ -1,11 +1,11 @@
-.no-template-otino {
+.no-template-readysms {
     position: relative;
     overflow: hidden;
 }
-.no-template-otino.loading .otino-loading-box {
+.no-template-readysms.loading .readysms-loading-box {
     display: flex !important;
 }
-.otino-response-box {
+.readysms-response-box {
     position: absolute;
     background: #ebffe2;
     color: #277504;
@@ -16,14 +16,14 @@
     align-items: center;
     border-radius: 12px;
 }
-.otino_otp_container {
+.readysms_otp_container {
     display: flex;
     justify-content: center;
     gap: 2.5%;
     direction: ltr;
     width: 100%;
 }
-.otino_otp_item {
+.readysms_otp_item {
     width: 100%;
     padding: 16px;
     text-align: center;
@@ -41,16 +41,16 @@
     transition: 0.3s all ease-in-out;
     aspect-ratio: 1 / 1;
 }
-.otino_otp_item:focus {
+.readysms_otp_item:focus {
     border-color: #00A2C3;
 }
-#otino-form-otp, .otino-login-form.otp-active {
+#readysms-form-otp, .readysms-login-form.otp-active {
     display: none !important;
 }
-.otino-login-form.otp-active + #otino-form-otp {
+.readysms-login-form.otp-active + #readysms-form-otp {
     display: inherit !important;
 }
-.otino-loading-box {
+.readysms-loading-box {
     display: none;
     background: #00000052;
     position: absolute;
@@ -61,27 +61,27 @@
     top: 0;
     right: 0;
 }
-.otino-loading-box svg {
+.readysms-loading-box svg {
     width: 45px;
     height: auto;
 }
-.response-otino {
+.readysms-messages {
     padding: 10px 22px 14px;
 }
-.otp-change-phone-otino {
+.readysms-otp-change-phone {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     font-size: 13px;
 }
-.change-phone-now-otino {
+.readysms-change-phone-trigger {
     display: flex;
     color: #00A2C3;
     justify-content: center;
     align-items: center;
     cursor: pointer;
 }
-.otp-time-reset-otino {
+.readysms-otp-timer {
     color: #52667B;
     font-size: 13px;
     justify-content: center;
