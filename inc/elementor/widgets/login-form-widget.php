@@ -1,23 +1,22 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-class Elementor_otino_login_form_Widget extends \Elementor\Widget_Base {
+class Elementor_ReadySMS_Login_Form_Widget extends \Elementor\Widget_Base {
 
     public function get_name() {
-        return 'otino_login_form';
+        return 'readysms_login_form';
     }
 
     public function get_title() {
-        return __('Otino Login Form', 'otino');
+        return __('ReadySMS Login Form', 'readysms');
     }
 
     public function get_icon() {
-        return 'eicon-accordion otino-el-icon';
+        return 'eicon-accordion readysms-el-icon';
     }
 
-
     public function get_categories() {
-        return ['otino_category'];
+        return ['readysms_category'];
     }
 
     protected function register_controls() {
@@ -25,7 +24,7 @@ class Elementor_otino_login_form_Widget extends \Elementor\Widget_Base {
         $this->start_controls_section(
             'content_section',
             [
-                'label' => esc_html__( 'Content', 'textdomain' ),
+                'label' => esc_html__( 'Content', 'readysms' ),
                 'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
             ]
         );
@@ -33,7 +32,7 @@ class Elementor_otino_login_form_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'width-avatar',
             [
-                'label' => esc_html__( 'Width', 'otino' ),
+                'label' => esc_html__( 'Width', 'readysms' ),
                 'type' => \Elementor\Controls_Manager::SLIDER,
                 'size_units' => [ 'px', 'custom' ],
                 'range' => [
@@ -53,7 +52,7 @@ class Elementor_otino_login_form_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'border-radius',
             [
-                'label' => esc_html__( 'Margin', 'textdomain' ),
+                'label' => esc_html__( 'Margin', 'readysms' ),
                 'type' => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => [ 'px', '%', 'em', 'rem', 'custom' ],
                 'default' => [
@@ -65,7 +64,7 @@ class Elementor_otino_login_form_Widget extends \Elementor\Widget_Base {
                     'isLinked' => false,
                 ],
                 'selectors' => [
-                    '{{WRAPPER}} .otino-profile-general img' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .readysms-profile-general img' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -84,7 +83,7 @@ class Elementor_otino_login_form_Widget extends \Elementor\Widget_Base {
         <?php woocommerce_login_form([]); ?>
         <?php
         if (is_admin()) {
-            echo '<style>.elementor-widget-otino_login_form .elementor-widget-container{min-height: 1px;}
+            echo '<style>.elementor-widget-readysms_login_form .elementor-widget-container{min-height: 1px;}
             </style>';
         }
     }
