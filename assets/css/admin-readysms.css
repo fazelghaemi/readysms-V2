@@ -1,17 +1,17 @@
-#optionino * {
+#readysms-panel * {
     font-family: VazirMatn !important;
 }
-#otino-loader {
+#readysms-loader {
     background: #f8f8f8;
     padding: 10px;
     border: 1px solid #ddd;
     width: 300px;
 }
-#otino-export-result .notice {
+#readysms-export-result .notice {
     padding: 15px;
     margin-top: 10px;
 }
-#otino-export-form {
+#readysms-export-form {
     display: flex;
     flex-direction: column;
     padding: 25px 35px;
@@ -19,14 +19,14 @@
     border-radius: 25px;
     min-height: 600px;
 }
-#otino-export-form h2 {
+#readysms-export-form h2 {
     font-size: 20px;
-    border-right: 3px solid var(--optionino-main-color);
+    border-right: 3px solid var(--readysms-panel-main-color);
     padding: 15px;
     margin: 0;
 }
-#otino-export-btn {
-    background-color: var(--optionino-main-color);
+#readysms-export-btn {
+    background-color: var(--readysms-panel-main-color);
     border: none;
     border-radius: 15px;
 }
